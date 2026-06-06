@@ -11,5 +11,5 @@ chat_service = ChatService()
 @router.post("/chat")
 async def chat(request: ChatRequest):  
     # Process the chat message using the ChatService
-    response = chat_service.process_message(request.message)
+    response = chat_service.generate_response(request.message)
     return {"message": response}
