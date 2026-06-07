@@ -7,6 +7,7 @@ class ImageAnalysisResponse(BaseModel):
     issue: str
     severity: str
     confidence: int
+    fault_detected: bool
 
     root_cause: str
     recommended_action: str

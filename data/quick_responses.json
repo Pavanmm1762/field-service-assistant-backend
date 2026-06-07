@@ -1,0 +1,32 @@
+{
+  "greeting": {
+    "match_mode": "startswith",
+    "keywords": ["hi", "hello", "hey", "good morning", "good afternoon", "good evening"],
+    "response": "Hello. How can I assist you today?"
+  },
+  "acknowledge": {
+    "match_mode": "exact",
+    "keywords": ["ok", "okay", "yep", "sure", "understood", "got it"],
+    "response": "Understood. Do you need help with anything else?"
+  },
+  "decline": {
+    "match_mode": "exact",
+    "keywords": ["no", "nope", "nah"],
+    "response": "Understood. If you need assistance later, feel free to ask."
+  },
+  "thanks": {
+    "match_mode": "startswith",
+    "keywords": ["thanks", "thank you", "thx", "appreciate it"],
+    "response": "You're welcome. Let me know if you need anything else."
+  },
+  "completion": {
+    "match_mode": "contains",
+    "keywords": ["done", "fixed", "resolved", "completed", "issue solved", "working fine", "working now", "its done", "it's done"],
+    "response": "Great. Perform a final verification test and monitor the equipment for a short period to ensure the issue is fully resolved."
+  },
+  "confirmation": {
+    "match_mode": "exact",
+    "keywords": ["correct", "right", "exactly"],
+    "response": "Confirmed. Let me know if you need further guidance."
+  }
+}

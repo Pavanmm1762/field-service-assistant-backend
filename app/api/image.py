@@ -5,6 +5,7 @@ import hashlib
 from app.services.vision_service import VisionService
 from app.services.cache_service import cache_service
 from app.services.context_service import context_service
+from app.repositories.session_repository import session_repository
 from app.models.response_models import ImageAnalysisResponse
 
 router = APIRouter(prefix="/api", tags=["Image"])
@@ -28,10 +29,22 @@ async def upload_image(file: UploadFile = File(...)):
     cached_result = cache_service.get(image_hash)
 
     if cached_result:
+        session = session_repository.create(
+            analysis=cached_result,
+            image_path="cached"
+        )
+
+        session_id = session.session_id
+
+        context_service.set_session_id(
+            session_id
+        )
+
         context_service.set_analysis(cached_result)
 
         return {
             **cached_result,
+            "session_id": session_id,
             "filename": file.filename,
             "saved_path": "cached",
             "content_type": file.content_type
@@ -46,6 +59,15 @@ async def upload_image(file: UploadFile = File(...)):
     # Analyze
     result = vision_service.analyze_image(str(file_location))
 
+    # Create session
+    session = session_repository.create(
+        analysis=result,
+        image_path=str(file_location)
+    )
+
+    session_id = session.session_id
+    context_service.set_session_id(session_id)
+
     # Cache result
     if (
         result.get("equipment") != "Unknown"
@@ -58,6 +80,7 @@ async def upload_image(file: UploadFile = File(...)):
 
     return {
         **result,
+        "session_id": session_id,
         "filename": file.filename,
         "saved_path": str(file_location),
         "content_type": file.content_type
