@@ -57,7 +57,7 @@ async def upload_image(file: UploadFile = File(...)):
         buffer.write(contents)
 
     # Analyze
-    result = vision_service.analyze_image(str(file_location))
+    result = await vision_service.analyze_image_async(str(file_location))
 
     # Create session
     session = session_repository.create(

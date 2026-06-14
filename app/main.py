@@ -1,13 +1,30 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from app.core.config import settings
+from app.db.init_db import init_db
+
 from app.api.image import router as image_router
 from app.api.chat import router as chat_router
 from app.api.history import router as history_router
 from app.api.session import router as session_router
-from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from fastapi.staticfiles import StaticFiles
+from app.core.logging import setup_logging
 
-app = FastAPI(title="Field Service Assistant")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+# Set up logging
+setup_logging()
+
+app = FastAPI(
+    title="Field Service Assistant",
+    lifespan=lifespan
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,5 +46,5 @@ app.include_router(history_router)  # Include history router for history managem
 app.include_router(session_router)  # Include session router for session management endpoints
 
 @app.get("/health")
-async def health():
+async def health(): 
     return {"status": "healthy"}

@@ -1,22 +1,20 @@
-# app/services/vision_service.py
+import asyncio
+import logging
 
-import json
-from google import genai
-from PIL import Image
-from app.core.config import settings
+from app.services.ai.factory import get_ai_service
+
+logger = logging.getLogger(__name__)
 
 
 class VisionService:
-
-    def __init__(self):
-        self.client = genai.Client(
-            api_key=settings.GEMINI_API_KEY
-        )
-
     def analyze_image(self, image_path: str):
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self.analyze_image_async(image_path))
+        raise RuntimeError("Use analyze_image_async() inside an async context.")
 
-        image = Image.open(image_path)
-
+    async def analyze_image_async(self, image_path: str):
         prompt = """
                 You are an expert field service engineer.
 
@@ -62,15 +60,15 @@ class VisionService:
                 Do not include notes.
                 Do not include any text before or after JSON.
             """
+
         try:
-            response = self.client.models.generate_content(
-                model="gemini-3.1-flash-lite",
-                contents=[prompt, image]
+            response = await get_ai_service().analyze_image(
+                image_path=image_path,
+                prompt=prompt,
             )
-
-        except Exception as e:
-            print(f"Gemini Error: {e}")
-
+            return response.model_dump(exclude_none=True)
+        except Exception as exc:
+            logger.exception("Image analysis failed: %s", exc)
             return {
                 "equipment": "Unknown",
                 "issue": "AI service temporarily unavailable",
@@ -81,36 +79,4 @@ class VisionService:
                 "recommended_action": "Please retry analysis in a few moments",
                 "tools_required": [],
                 "safety_warning": ""
-            }
-         
-        text = response.text.strip()
-
-        if text.startswith("```json"):
-            text = text.replace("```json", "").replace("```", "").strip()
-
-        try:
-            data = json.loads(text)
-            return {
-                "equipment": data.get("equipment", "Unknown"),
-                "issue": data.get("issue", "Unknown"),
-                "severity": data.get("severity", "Low"),
-                "confidence": data.get("confidence", 0),
-                "fault_detected": data.get("fault_detected", False),
-                "root_cause": data.get("root_cause", ""),
-                "recommended_action": data.get("recommended_action", ""),
-                "tools_required": data.get("tools_required", []),
-                "safety_warning": data.get("safety_warning", "")
-            }
-        except Exception:
-            return {
-                "equipment": "Unknown",
-                "issue": "Unable to determine",
-                "severity": "Low",
-                "confidence": 0,
-                "fault_detected": False,
-                "root_cause": "",
-                "recommended_action": "",
-                "tools_required": [],
-                "safety_warning": "",
-                "raw_response": text
             }
