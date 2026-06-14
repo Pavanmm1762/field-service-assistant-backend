@@ -1,9 +1,32 @@
+import logging
 from pathlib import Path
+from sqlalchemy.orm import Session
 
+from app.repositories.document_repository import (
+    DocumentRepository, 
+)
+from app.repositories.document_chunk_repository import (
+    DocumentChunkRepository,
+)   
+from app.services.document_ingestion_service import (   
+    DocumentIngestionService,
+)
+from app.services.document_management_service import (
+    DocumentManagementService,
+)
+from app.services.pdf_loader import PDFLoader
+from app.services.chunking_service import (
+    ChunkingService,
+)
+from app.services.embedding_service import (
+    EmbeddingService    
+)
+from app.services.sync_knowledge_service import SyncKnowledgeService
 from app.utils.checksum import (
     generate_checksum,
 )
 
+logger = logging.getLogger(__name__)
 
 class SyncKnowledgeService:
 
@@ -72,7 +95,7 @@ class SyncKnowledgeService:
 
             if not existing_document:
 
-                print(
+                logger.info(
                     f"[NEW] {pdf_file.name}"
                 )
 
@@ -90,7 +113,7 @@ class SyncKnowledgeService:
             ):
                 updated_count += 1
 
-                print(
+                logger.info(
                     f"[UPDATED] {pdf_file.name}"
                 )
 
@@ -100,7 +123,7 @@ class SyncKnowledgeService:
 
             else:
                 unchanged_count += 1
-                print(
+                logger.info(
                     f"[UNCHANGED] {pdf_file.name}"
                 )
 
@@ -114,7 +137,7 @@ class SyncKnowledgeService:
                 not in discovered_files
             ):
 
-                print(
+                logger.info(
                     f"[REMOVED] {document.filename}"
                 )
 
@@ -124,8 +147,11 @@ class SyncKnowledgeService:
 
                 removed_count += 1
 
-        print("\n=== Sync Summary ===")
-        print(f"New: {new_count}")
-        print(f"Updated: {updated_count}")
-        print(f"Unchanged: {unchanged_count}")
-        print(f"Removed: {removed_count}")
+        summary = {
+            "new": new_count,
+            "updated": updated_count,
+            "unchanged": unchanged_count,
+            "removed": removed_count,
+        }
+        return summary
+    

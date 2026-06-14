@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     LLM_API_KEY: SecretStr | None = None
     LLM_API_TYPE: str = "openai"
     LLM_API_VERSION: str | None = None
-    LLM_MODEL: str
+    LLM_MODEL: str | None = None
     LLM_EMBEDDING_MODEL: str | None = None
     LLM_VISION_MODEL: str | None = None
     CHAT_MODEL: str | None = None

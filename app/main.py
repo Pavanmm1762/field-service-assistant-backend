@@ -11,6 +11,7 @@ from app.api.image import router as image_router
 from app.api.chat import router as chat_router
 from app.api.history import router as history_router
 from app.api.session import router as session_router
+from app.api.knowledge import router as knowledge_router
 from app.core.logging import setup_logging
 
 @asynccontextmanager
@@ -40,6 +41,7 @@ app.mount(
     name="uploads"
 )
 # routers
+app.include_router(knowledge_router)  # Include knowledge router for knowledge management endpoints
 app.include_router(image_router)       
 app.include_router(chat_router)
 app.include_router(history_router)  # Include history router for history management endpoints
