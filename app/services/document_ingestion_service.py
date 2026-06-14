@@ -66,7 +66,10 @@ class DocumentIngestionService:
         )
 
         if existing_document:
-            logger.info("Document already exists")
+            logger.info(
+                "Document already indexed: %s",
+                Path(pdf_path).name,
+            )
             return existing_document
 
         document = Document(
@@ -107,7 +110,7 @@ class DocumentIngestionService:
                 document
             )
 
-            logger.error(
+            logger.exception(
                 f"Document ingestion failed: {e}"
             )
 

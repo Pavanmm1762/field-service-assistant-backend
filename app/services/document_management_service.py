@@ -1,10 +1,3 @@
-from app.repositories.document_repository import (
-    DocumentRepository,
-)
-from app.repositories.document_chunk_repository import (
-    DocumentChunkRepository,
-)
-
 
 class DocumentManagementService:
 
@@ -25,8 +18,14 @@ class DocumentManagementService:
         return (
             self.document_repository
             .list_all()
+        )   
+    
+    def get_document_status(self):
+        return (
+            self.document_repository
+            .get_status()
         )
-
+    
     def delete_document(
         self,
         document_id,
@@ -46,8 +45,42 @@ class DocumentManagementService:
             document.id
         )
 
-        self.document_repository.delete(
-            document
+        self.document_repository.delete_by_id(
+            document.id
         )
 
-        return True
+        return document
+    
+    def reindex_document(
+        self,
+        document_id,
+    ):
+
+        document = (
+            self.document_repository.get_by_id(
+                document_id
+            )
+        )
+
+        if not document:
+            return None
+
+        return self.ingestion_service.reindex_document(
+                document=document,
+            )
+
+    def reindex_all_documents(self):
+
+        documents = (
+            self.document_repository.get_all()
+        )
+
+        count = 0
+        for document in documents:
+
+            document = self.ingestion_service.reindex_document(
+                document=document,
+            )
+            count += 1
+
+        return count

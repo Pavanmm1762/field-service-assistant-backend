@@ -1,27 +1,6 @@
 import logging
 from pathlib import Path
-from sqlalchemy.orm import Session
 
-from app.repositories.document_repository import (
-    DocumentRepository, 
-)
-from app.repositories.document_chunk_repository import (
-    DocumentChunkRepository,
-)   
-from app.services.document_ingestion_service import (   
-    DocumentIngestionService,
-)
-from app.services.document_management_service import (
-    DocumentManagementService,
-)
-from app.services.pdf_loader import PDFLoader
-from app.services.chunking_service import (
-    ChunkingService,
-)
-from app.services.embedding_service import (
-    EmbeddingService    
-)
-from app.services.sync_knowledge_service import SyncKnowledgeService
 from app.utils.checksum import (
     generate_checksum,
 )
@@ -74,6 +53,9 @@ class SyncKnowledgeService:
         for pdf_file in knowledge_dir.rglob(
             "*.pdf"
         ):
+            # for jupyter notebook checkpoints, skip them
+            if ".ipynb_checkpoints" in pdf_file.parts:
+                continue
 
             file_path = str(pdf_file)
 
