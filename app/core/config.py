@@ -8,12 +8,20 @@ class Settings(BaseSettings):
 
     LLM_PROVIDER: str = "gemini"
     LLM_BASE_URL: str | None = None
+    CHAT_BASE_URL: str | None = None
+    VISION_BASE_URL: str | None = None
+    EMBEDDING_BASE_URL: str | None = None
+    RERANKER_BASE_URL: str | None = None
     LLM_API_KEY: SecretStr | None = None
     LLM_API_TYPE: str = "openai"
     LLM_API_VERSION: str | None = None
     LLM_MODEL: str
     LLM_EMBEDDING_MODEL: str | None = None
     LLM_VISION_MODEL: str | None = None
+    CHAT_MODEL: str | None = None
+    VISION_MODEL: str | None = None
+    EMBEDDING_MODEL: str | None = None
+    RERANKER_MODEL: str | None = None
 
     # Backward compatibility for the current deployment. Prefer LLM_API_KEY.
     GEMINI_API_KEY: SecretStr | None = None

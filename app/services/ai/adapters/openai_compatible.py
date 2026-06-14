@@ -35,9 +35,28 @@ class OpenAICompatibleAdapter:
                 api_version=settings.LLM_API_VERSION,
             )
         else:
-            self.client = AsyncOpenAI(
+            self.chat_client = AsyncOpenAI(
                 api_key=api_key,
-                base_url=settings.LLM_BASE_URL,
+                base_url=settings.CHAT_BASE_URL,
+            )
+
+            self.vision_client = AsyncOpenAI(
+                api_key=api_key,
+                base_url=settings.VISION_BASE_URL,
+            )
+
+            self.embedding_client = AsyncOpenAI(
+                api_key=api_key,
+                base_url=settings.EMBEDDING_BASE_URL,
+            )
+
+            self.reranker_client = (
+                AsyncOpenAI(
+                    api_key=api_key,
+                    base_url=settings.RERANKER_BASE_URL,
+                )
+                if settings.RERANKER_BASE_URL
+                else None
             )
 
     async def chat(
@@ -49,10 +68,15 @@ class OpenAICompatibleAdapter:
     ) -> AIResponse:
         model_name = model or self.settings.LLM_MODEL
         try:
-            response = await self.client.chat.completions.create(
+            response = await self.chat_client.chat.completions.create(
                 model=model_name,
                 messages=[message.model_dump() for message in messages],
                 temperature=temperature,
+                extra_body={
+                    "chat_template_kwargs": {
+                        "enable_thinking": False
+                    }
+                }
             )
             choice = response.choices[0].message
             return AIResponse(
@@ -76,7 +100,7 @@ class OpenAICompatibleAdapter:
     ) -> AIResponse:
         model_name = model or self.settings.LLM_MODEL
         try:
-            response = await self.client.chat.completions.create(
+            response = await self.chat_client.chat.completions.create(
                 model=model_name,
                 messages=[message.model_dump() for message in messages],
                 tools=tools,
@@ -103,7 +127,7 @@ class OpenAICompatibleAdapter:
     ) -> EmbeddingResponse:
         model_name = model or self.settings.LLM_EMBEDDING_MODEL or self.settings.LLM_MODEL
         try:
-            response = await self.client.embeddings.create(
+            response = await self.embedding_client.embeddings.create(
                 model=model_name,
                 input=text,
             )
@@ -127,7 +151,7 @@ class OpenAICompatibleAdapter:
         path = Path(image_path)
         data_url = self._image_data_url(path)
         try:
-            response = await self.client.chat.completions.create(
+            response = await self.vision_client.chat.completions.create(
                 model=model_name,
                 messages=[
                     {
