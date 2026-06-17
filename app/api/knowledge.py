@@ -33,7 +33,6 @@ from app.services.chunking_service import (
 from app.services.embedding_service import (
     EmbeddingService,
 )
-from app.repositories.document_repository import document_repository
 
 router = APIRouter(
     prefix="/api/knowledge",
@@ -65,17 +64,23 @@ def get_documents(
     service = get_document_management_service(db)
     documents = service.list_documents()
 
-    return [
-        {
-            "id": str(document.id),
-            "filename": document.filename,
-            "equipment": document.equipment,
-            "status": document.status,
-            "chunk_count": document.chunk_count,
-            "created_at": document.created_at,
-        }
-        for document in documents
-    ]
+    return {
+        "data": [
+            {
+                "id": str(document.id),
+                "filename": document.filename,
+                "equipment": document.equipment,
+                "status": document.status,
+                "chunk_count": document.chunk_count,
+                "created_at": document.created_at,
+            }
+            for document in documents
+        ],
+        "total": len(documents),
+        "page": 1,
+        "pageSize": len(documents),
+        "totalPages": 1,
+    }
 
 # Endpoint to retrieve document status summary
 @router.get("/documents/status")
